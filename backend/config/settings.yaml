@@ -1,0 +1,40 @@
+database:
+  cache_db: "data/cache/routes.db"
+  map_data: "data/processed/graph.pkl"
+  redis_url: "redis://localhost:6379"
+
+algorithms:
+  default: "astar"
+  heuristic: "haversine"
+  max_search_radius: 10000  # meters
+
+cache:
+  max_cache_size: 1000000
+  cache_expiry_days: 30
+  precompute_popular_routes: true
+  redis_expire_seconds: 86400
+
+osm:
+  data_source: "overpass-api"
+  default_bbox: [40.7580, -73.9855, 40.7614, -73.9776]  # Small NYC area
+  highway_types:
+    - "primary"
+    - "secondary"
+    - "tertiary"
+    - "residential"
+    - "trunk"
+    - "motorway"
+
+api:
+  host: "0.0.0.0"
+  port: 5000
+  debug: true
+  rate_limit: 100
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://127.0.0.1:3000"
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/app.log"
