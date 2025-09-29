@@ -1,0 +1,203 @@
+city:
+  name: "Hanoi"
+  country: "Vietnam"
+  timezone: "Asia/Ho_Chi_Minh"
+  
+  # City center coordinates (Hoan Kiem Lake)
+  center:
+    latitude: 21.0285
+    longitude: 105.8542
+  
+  # City boundaries (approximate)
+  bbox:
+    min_lat: 20.9500
+    min_lon: 105.7000
+    max_lat: 21.1500
+    max_lon: 105.9500
+
+# Hanoi districts for focused data downloads
+districts:
+  hoan_kiem:
+    name: "Hoàn Kiếm"
+    bbox: [21.0180, 105.8420, 21.0380, 105.8620]
+    priority: 1
+    
+  ba_dinh:
+    name: "Ba Đình"
+    bbox: [21.0250, 105.8150, 21.0450, 105.8400]
+    priority: 1
+    
+  dong_da:
+    name: "Đống Đa"
+    bbox: [21.0100, 105.8150, 21.0350, 105.8400]
+    priority: 2
+    
+  hai_ba_trung:
+    name: "Hai Bà Trưng"
+    bbox: [21.0000, 105.8400, 21.0250, 105.8700]
+    priority: 2
+    
+  cau_giay:
+    name: "Cầu Giấy"
+    bbox: [21.0200, 105.7800, 21.0450, 105.8100]
+    priority: 2
+    
+  tay_ho:
+    name: "Tây Hồ"
+    bbox: [21.0450, 105.8000, 21.0800, 105.8350]
+    priority: 3
+    
+  thanh_xuan:
+    name: "Thanh Xuân"
+    bbox: [20.9950, 105.7900, 21.0150, 105.8200]
+    priority: 3
+
+# Major landmarks and POIs in Hanoi
+landmarks:
+  - id: 1
+    name: "Hồ Hoàn Kiếm"
+    name_en: "Hoan Kiem Lake"
+    category: "landmark"
+    lat: 21.0285
+    lon: 105.8542
+    description: "Historic lake in the heart of Hanoi"
+    
+  - id: 2
+    name: "Nhà Hát Lớn Hà Nội"
+    name_en: "Hanoi Opera House"
+    category: "landmark"
+    lat: 21.0231
+    lon: 105.8567
+    description: "French colonial era opera house"
+    
+  - id: 3
+    name: "Văn Miếu - Quốc Tử Giám"
+    name_en: "Temple of Literature"
+    category: "landmark"
+    lat: 21.0277
+    lon: 105.8355
+    description: "Vietnam's first national university"
+    
+  - id: 4
+    name: "Lăng Chủ tịch Hồ Chí Minh"
+    name_en: "Ho Chi Minh Mausoleum"
+    category: "landmark"
+    lat: 21.0375
+    lon: 105.8345
+    description: "Final resting place of Ho Chi Minh"
+    
+  - id: 5
+    name: "Chợ Đồng Xuân"
+    name_en: "Dong Xuan Market"
+    category: "landmark"
+    lat: 21.0355
+    lon: 105.8485
+    description: "Largest covered market in Hanoi"
+    
+  - id: 6
+    name: "Cầu Long Biên"
+    name_en: "Long Bien Bridge"
+    category: "landmark"
+    lat: 21.0448
+    lon: 105.8548
+    description: "Historic cantilever bridge"
+
+universities:
+  - id: 101
+    name: "Đại học Bách Khoa Hà Nội"
+    name_en: "Hanoi University of Science and Technology"
+    short_name: "HUST"
+    category: "university"
+    lat: 21.0047
+    lon: 105.8438
+    address: "1 Đại Cồ Việt, Hai Bà Trưng"
+    
+  - id: 102
+    name: "Đại học Quốc Gia Hà Nội"
+    name_en: "Vietnam National University"
+    short_name: "VNU"
+    category: "university"
+    lat: 21.0380
+    lon: 105.7820
+    address: "144 Xuân Thủy, Cầu Giấy"
+    
+  - id: 103
+    name: "Đại học Kinh tế Quốc dân"
+    name_en: "National Economics University"
+    short_name: "NEU"
+    category: "university"
+    lat: 21.0115
+    lon: 105.8470
+    address: "207 Giải Phóng, Hai Bà Trưng"
+    
+  - id: 104
+    name: "Đại học Y Hà Nội"
+    name_en: "Hanoi Medical University"
+    short_name: "HMU"
+    category: "university"
+    lat: 21.0075
+    lon: 105.8385
+    address: "1 Tôn Thất Tùng, Đống Đa"
+
+hospitals:
+  - id: 201
+    name: "Bệnh viện Bạch Mai"
+    name_en: "Bach Mai Hospital"
+    category: "hospital"
+    lat: 21.0032
+    lon: 105.8412
+    address: "78 Giải Phóng, Đống Đa"
+    type: "General Hospital"
+    
+  - id: 202
+    name: "Bệnh viện Việt Đức"
+    name_en: "Viet Duc Hospital"
+    category: "hospital"
+    lat: 21.0265
+    lon: 105.8465
+    address: "40 Tràng Thi, Hoàn Kiếm"
+    type: "Surgical Hospital"
+    
+  - id: 203
+    name: "Bệnh viện E"
+    name_en: "E Hospital"
+    category: "hospital"
+    lat: 21.0095
+    lon: 105.8525
+    address: "87-89 Trần Cung, Hai Bà Trưng"
+    type: "General Hospital"
+    
+  - id: 204
+    name: "Bệnh viện 108"
+    name_en: "108 Central Military Hospital"
+    category: "hospital"
+    lat: 21.0015
+    lon: 105.8195
+    address: "1 Trần Hưng Đạo, Hoàng Mai"
+    type: "Military Hospital"
+    
+  - id: 205
+    name: "Bệnh viện Thanh Nhàn"
+    name_en: "Thanh Nhan Hospital"
+    category: "hospital"
+    lat: 21.0158
+    lon: 105.8538
+    address: "42 Thanh Nhàn, Hai Bà Trưng"
+    type: "Maternity Hospital"
+
+# Road network preferences for Hanoi
+routing:
+  # Default speeds for Hanoi traffic (typically slower than standard)
+  speed_adjustments:
+    motorway: 0.7      # 70% of standard speed due to traffic
+    trunk: 0.7
+    primary: 0.6
+    secondary: 0.6
+    tertiary: 0.5
+    residential: 0.5
+  
+  # Peak hour traffic multipliers
+  peak_hours:
+    morning: [7, 9]    # 7 AM - 9 AM
+    evening: [17, 19]  # 5 PM - 7 PM
+    speed_multiplier: 0.5  # Routes take 2x longer
