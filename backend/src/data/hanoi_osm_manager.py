@@ -28,7 +28,7 @@ class HanoiOSMManager:
     - Hanoi-specific routing preferences
     """
     
-    def __init__(self, config_path: str = "backend/config/hanoi_config.yaml"):
+    def __init__(self, config_path: str = "/home/toantd/my-folder/hoc/code/pathfinding-project/backend/config/hanoi_config.yaml"):
         """Initialize Hanoi OSM manager"""
         self.config_path = config_path
         self.config = self._load_config()
