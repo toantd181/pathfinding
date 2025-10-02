@@ -31,7 +31,7 @@ def precompute_poi_routes():
     
     # Load graph
     print("📦 Loading Hanoi graph...")
-    graph_file = get_graph_file("hanoi_center")
+    graph_file = get_graph_file("hanoi_main")
     
     if not graph_file.exists():
         logger.error(f"Graph file not found: {graph_file}")

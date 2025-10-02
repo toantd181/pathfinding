@@ -1,12 +1,18 @@
+# =====================================
+# File: backend/src/core/graph.py (FIXED VERSION)
+# =====================================
+
 """
 Graph class representing the complete road network
 Optimized for pathfinding operations with spatial indexing
+FIXED: Handles large graphs without recursion errors
 """
 
 from typing import Dict, List, Set, Tuple, Optional
 import math
 import pickle
 import logging
+import sys
 from collections import defaultdict
 from .node import Node
 from .edge import Edge, RoadType
@@ -24,6 +30,7 @@ class Graph:
     - Spatial indexing for nearest neighbor queries
     - Edge management with bidirectional support
     - Graph statistics and validation
+    - Handles large graphs (50k+ nodes)
     """
     
     def __init__(self):
@@ -222,26 +229,99 @@ class Graph:
         }
     
     def save_to_file(self, filename: str) -> None:
-        """Save graph to pickle file"""
-        with open(filename, 'wb') as f:
-            pickle.dump({
-                'nodes': self.nodes,
-                'edges': self.edges,
-                'stats': self.stats
-            }, f)
-        logger.info(f"Graph saved to {filename}")
+        """
+        Save graph to pickle file
+        FIXED: Handles large graphs by breaking circular references
+        """
+        # Save original recursion limit
+        old_limit = sys.getrecursionlimit()
+        
+        try:
+            # Increase recursion limit for large graphs
+            sys.setrecursionlimit(50000)
+            
+            # Prepare data with reduced circular references
+            # Store neighbors as ID lists instead of Node references
+            nodes_data = {}
+            for node_id, node in self.nodes.items():
+                # Create a lightweight copy without neighbor references
+                nodes_data[node_id] = {
+                    'id': node.id,
+                    'latitude': node.latitude,
+                    'longitude': node.longitude,
+                    'tags': node.tags,
+                    'neighbor_ids': [(n.id, w) for n, w in node.neighbors]
+                }
+            
+            with open(filename, 'wb') as f:
+                pickle.dump({
+                    'nodes_data': nodes_data,
+                    'edges': self.edges,
+                    'stats': self.stats,
+                    'version': '2.0'  # Mark as new format
+                }, f, protocol=pickle.HIGHEST_PROTOCOL)
+            
+            logger.info(f"Graph saved to {filename}")
+            
+        finally:
+            # Restore original limit
+            sys.setrecursionlimit(old_limit)
     
     def load_from_file(self, filename: str) -> None:
-        """Load graph from pickle file"""
-        with open(filename, 'rb') as f:
-            data = pickle.load(f)
-            self.nodes = data['nodes']
-            self.edges = data['edges']
-            self.stats = data.get('stats', {})
+        """
+        Load graph from pickle file
+        FIXED: Handles both old and new format
+        """
+        # Save original recursion limit
+        old_limit = sys.getrecursionlimit()
         
-        # Rebuild spatial index
-        self._rebuild_spatial_index()
-        logger.info(f"Graph loaded from {filename}")
+        try:
+            # Increase recursion limit
+            sys.setrecursionlimit(50000)
+            
+            with open(filename, 'rb') as f:
+                data = pickle.load(f)
+            
+            # Check if it's the new format
+            if 'version' in data and data['version'] == '2.0':
+                # New format: reconstruct nodes with neighbor references
+                nodes_data = data['nodes_data']
+                
+                # First pass: create all nodes without neighbors
+                self.nodes = {}
+                for node_id, node_data in nodes_data.items():
+                    node = Node(
+                        id=node_data['id'],
+                        latitude=node_data['latitude'],
+                        longitude=node_data['longitude'],
+                        tags=node_data['tags']
+                    )
+                    self.nodes[node_id] = node
+                
+                # Second pass: restore neighbor relationships
+                for node_id, node_data in nodes_data.items():
+                    node = self.nodes[node_id]
+                    for neighbor_id, weight in node_data['neighbor_ids']:
+                        if neighbor_id in self.nodes:
+                            neighbor = self.nodes[neighbor_id]
+                            node.neighbors.append((neighbor, weight))
+                
+                self.edges = data['edges']
+                self.stats = data.get('stats', {})
+                
+            else:
+                # Old format: direct load
+                self.nodes = data['nodes']
+                self.edges = data['edges']
+                self.stats = data.get('stats', {})
+            
+            # Rebuild spatial index
+            self._rebuild_spatial_index()
+            logger.info(f"Graph loaded from {filename}")
+            
+        finally:
+            # Restore original limit
+            sys.setrecursionlimit(old_limit)
     
     def _add_to_spatial_index(self, node: Node) -> None:
         """Add node to spatial index"""
