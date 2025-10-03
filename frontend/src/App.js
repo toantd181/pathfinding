@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMapEvents, CircleMarker } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMapEvents, CircleMarker, Rectangle } from 'react-leaflet';
 import L from 'leaflet';
-import { Navigation, Clock, Loader, AlertCircle, Target, RotateCcw, MapPinned } from 'lucide-react';
+import { Navigation, Clock, Loader, AlertCircle, Target, RotateCcw, MapPinned, Map } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
 // Fix for default marker icons
@@ -60,9 +60,25 @@ const HanoiLeafletMap = () => {
   const [backendStatus, setBackendStatus] = useState('checking');
   const [mapMode, setMapMode] = useState('start');
   const [showPOIs, setShowPOIs] = useState(true);
+  const [showCoverage, setShowCoverage] = useState(true);
 
   const API_BASE = 'http://localhost:5000/api';
   const HANOI_CENTER = [21.0285, 105.8542];
+
+  // Define coverage area boundaries (adjust based on your downloaded data)
+  // These coordinates should match your hanoi_main.pkl coverage
+  const COVERAGE_BOUNDS = {
+    north: 21.0829,   // Adjust to your actual coverage
+    south: 20.9961,
+    east: 105.8733,
+    west: 105.7751
+  };
+
+  // Create boundary for coverage area
+  const coverageBounds = [
+    [COVERAGE_BOUNDS.south, COVERAGE_BOUNDS.west],
+    [COVERAGE_BOUNDS.north, COVERAGE_BOUNDS.east]
+  ];
 
   useEffect(() => {
     checkBackend();
@@ -228,7 +244,7 @@ const HanoiLeafletMap = () => {
             </div>
           )}
 
-          <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between">
             <p className="text-gray-600">
               <MapPinned size={16} className="inline mr-1" />
               Click anywhere on the map to set start and end points
@@ -242,6 +258,16 @@ const HanoiLeafletMap = () => {
                   className="rounded"
                 />
                 Show POIs
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={showCoverage}
+                  onChange={(e) => setShowCoverage(e.target.checked)}
+                  className="rounded"
+                />
+                <Map size={16} className="inline" />
+                Coverage Area
               </label>
               <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
                 <Target size={16} className="text-blue-600" />
@@ -410,6 +436,67 @@ const HanoiLeafletMap = () => {
                   />
 
                   <MapClickHandler onMapClick={handleMapClick} mapMode={mapMode} />
+
+                  {/* Coverage area boundary and dim outside areas */}
+                  {showCoverage && (
+                    <>
+                      {/* Coverage area border (green rectangle) */}
+                      <Rectangle
+                        bounds={coverageBounds}
+                        pathOptions={{
+                          color: '#10B981',
+                          weight: 3,
+                          fill: false,
+                          dashArray: '10, 10'
+                        }}
+                      />
+                      
+                      {/* Dim areas outside coverage - create 4 rectangles around the coverage area */}
+                      {/* Top overlay */}
+                      <Rectangle
+                        bounds={[[COVERAGE_BOUNDS.north, -180], [90, 180]]}
+                        pathOptions={{
+                          color: 'transparent',
+                          fillColor: '#000000',
+                          fillOpacity: 0.4,
+                          weight: 0
+                        }}
+                      />
+                      
+                      {/* Bottom overlay */}
+                      <Rectangle
+                        bounds={[[-90, -180], [COVERAGE_BOUNDS.south, 180]]}
+                        pathOptions={{
+                          color: 'transparent',
+                          fillColor: '#000000',
+                          fillOpacity: 0.4,
+                          weight: 0
+                        }}
+                      />
+                      
+                      {/* Left overlay */}
+                      <Rectangle
+                        bounds={[[COVERAGE_BOUNDS.south, -180], [COVERAGE_BOUNDS.north, COVERAGE_BOUNDS.west]]}
+                        pathOptions={{
+                          color: 'transparent',
+                          fillColor: '#000000',
+                          fillOpacity: 0.4,
+                          weight: 0
+                        }}
+                      />
+                      
+                      {/* Right overlay */}
+                      <Rectangle
+                        bounds={[[COVERAGE_BOUNDS.south, COVERAGE_BOUNDS.east], [COVERAGE_BOUNDS.north, 180]]}
+                        pathOptions={{
+                          color: 'transparent',
+                          fillColor: '#000000',
+                          fillOpacity: 0.4,
+                          weight: 0
+                        }}
+                      />
+                    </>
+                  )}
 
                   {/* POI Markers */}
                   {showPOIs && pois.map((poi) => {
