@@ -1,0 +1,6 @@
+ const COVERAGE_BOUNDS = {
+    north: 21.0829,   // Adjust to your actual coverage
+    south: 20.9961,
+    east: 105.8733,
+    west: 105.7751
+  };

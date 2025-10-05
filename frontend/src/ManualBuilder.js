@@ -225,7 +225,7 @@ function ManualGraphBuilder() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'hanoi_manual_graph.json';
+    a.download = 'hanoi_manual_graph_v1.json';
     a.click();
   };
 
@@ -281,7 +281,7 @@ function ManualGraphBuilder() {
   }).filter(Boolean);
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-md p-4">
         <div className="max-w-7xl mx-auto">
@@ -402,7 +402,7 @@ function ManualGraphBuilder() {
       </div>
 
       {/* Map and Sidebar */}
-      <div className="flex-1 flex">
+      <div className="flex" style={{ height: 'calc(100vh - 200px)' }}>
         {/* Sidebar */}
         <div className="w-80 bg-white border-r overflow-y-auto p-4">
           <h3 className="font-bold mb-3">Nodes ({nodes.length})</h3>

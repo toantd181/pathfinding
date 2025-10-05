@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class PathfindingService:
     """Main pathfinding service with absolute paths"""
     
-    def __init__(self, graph_name: str = "hanoi_main"):
+    def __init__(self, graph_name: str = "hanoi_manual_graph_v1"):
         """Initialize pathfinding service"""
         self.graph_name = graph_name
         self.graph = None

@@ -281,4 +281,7 @@ def create_app():
             'error': 'Internal server error'
         }), 500
     
+    from .manual_graph_endpoints import manual_graph_bp
+    app.register_blueprint(manual_graph_bp)
+
     return app
