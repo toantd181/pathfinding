@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import ManualGraphBuilder from './ManualBuilder';
-import PathfindingVisualizer from './PathfindingVisualizer';
+// Import the new dashboard component
+import PathfindingDashboard from './PathfindingDashboard';
 
 function App() {
-  const [currentView, setCurrentView] = useState('builder');
+  const [currentView, setCurrentView] = useState('pathfinding'); // Default to pathfinding
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
@@ -33,12 +34,13 @@ function App() {
         </div>
       </nav>
 
-      {/* Content - with proper scrolling */}
+      {/* Content area */}
       <div className="flex-1 overflow-auto">
         {currentView === 'builder' ? (
           <ManualGraphBuilder />
         ) : (
-          <PathfindingVisualizer />
+          // Render the new dashboard component
+          <PathfindingDashboard />
         )}
       </div>
     </div>

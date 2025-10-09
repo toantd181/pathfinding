@@ -374,127 +374,120 @@ const PathfindingVisualizer = () => {
 };
 
 const toggleEdgeStatusByEdgeId = (edgeId, status) => {
-  const newBlocked = new Set(blockedEdges);
-  const newTraffic = new Set(trafficJamEdges);
-  newBlocked.delete(edgeId);
-  newTraffic.delete(edgeId);
-  if (status === "block") newBlocked.add(edgeId);
-  else if (status === "traffic") newTraffic.add(edgeId);
-  setBlockedEdges(newBlocked);
-  setTrafficJamEdges(newTraffic);
-  resetVisualization();
-};
+    // Use functional updates for robustness
+    setBlockedEdges(currentBlocked => {
+      const newBlocked = new Set(currentBlocked);
+      if (status === "block") {
+        newBlocked.add(edgeId);
+      } else {
+        newBlocked.delete(edgeId);
+      }
+      return newBlocked;
+    });
+
+    setTrafficJamEdges(currentTraffic => {
+      const newTraffic = new Set(currentTraffic);
+      if (status === "traffic") {
+        newTraffic.add(edgeId);
+      } else {
+        newTraffic.delete(edgeId);
+      }
+      return newTraffic;
+    });
+
+    resetVisualization();
+  };
 
 
-  const isEdgeBlocked = (fromId, toId) => blockedEdges.has(getEdgeKey(fromId, toId));
-  const hasTrafficJam = (fromId, toId) => trafficJamEdges.has(getEdgeKey(fromId, toId));
-
-  /* ------------------------- Map click handling (unchanged from prior improved logic) ------------------------- */
   const handleMapClick = (latlng) => {
     if (isRunning) return;
 
     if (mode === "road-status" && roadStatusMode) {
-      // use current graph and sets as base
-      const baseGraph = tempGraphRef.current?.graph || graph;
-      const baseBlocked = tempGraphRef.current?.blocked || blockedEdges;
-      const baseTraffic = tempGraphRef.current?.traffic || trafficJamEdges;
-
-      const result = findNearestEdgeAndProjection(latlng.lat, latlng.lng, baseGraph);
+      const result = findNearestEdgeAndProjection(latlng.lat, latlng.lng, graph);
       if (!result) {
         alert("No road found near this location. Click closer to a road.");
         return;
       }
-
-      // prefer endpoint if very close
-      const nearNode = findNearestNodeOnEdge(result.edge, latlng.lat, latlng.lng, baseGraph);
-
-      // produce working split (if necessary) but do not persist setGraph yet
-      const { newNodeId: clickedNodeId, newGraph, newBlockedSet, newTrafficSet } = nearNode
-        ? { newNodeId: nearNode.id, newGraph: baseGraph, newBlockedSet: new Set(baseBlocked), newTrafficSet: new Set(baseTraffic) }
-        : splitEdgeAtSync(baseGraph, result.edge.id, result.projection, baseBlocked, baseTraffic);
-
-      // store a temporary graph state so subsequent click uses the already-split graph
-      tempGraphRef.current = { graph: newGraph, blocked: newBlockedSet, traffic: newTrafficSet };
-
-      const clickedInfo = {
-        nodeId: clickedNodeId,
-        edgeId: result.edge.id,
-        lat: result.projection.lat,
-        lng: result.projection.lng,
-        projection: result.projection,
-      };
+      const clickedEdge = result.edge;
 
       if (!firstBlockNode) {
-        setFirstBlockNode(clickedInfo);
+        setFirstBlockNode({
+          edgeId: clickedEdge.id,
+          from: clickedEdge.from,
+          to: clickedEdge.to,
+        });
         setFirstBlockPoint({ lat: latlng.lat, lng: latlng.lng });
         return;
       }
 
-      // second click: ensure not the same node
-      if (clickedInfo.nodeId === firstBlockNode.nodeId) {
-        alert("You clicked the same location twice. Please choose two different points.");
-        setFirstBlockNode(null);
-        setFirstBlockPoint(null);
-        tempGraphRef.current = null;
-        return;
-      }
+      // On the second click, gather all edges to be modified
+      const startEdgeInfo = firstBlockNode;
+      const endEdgeInfo = {
+        edgeId: clickedEdge.id,
+        from: clickedEdge.from,
+        to: clickedEdge.to,
+      };
 
-      // split the second point on the current working graph (which may already contain first split)
-      const baseForSecond = tempGraphRef.current?.graph || graph;
-      const baseBlockedForSecond = tempGraphRef.current?.blocked || blockedEdges;
-      const baseTrafficForSecond = tempGraphRef.current?.traffic || trafficJamEdges;
+      const edgesToModify = new Set();
 
-      const secondResult = findNearestEdgeAndProjection(latlng.lat, latlng.lng, baseForSecond);
-      if (!secondResult) {
-        alert("Second point not on any road in working graph. Abort.");
-        setFirstBlockNode(null);
-        setFirstBlockPoint(null);
-        tempGraphRef.current = null;
-        return;
-      }
-
-      const nearNode2 = findNearestNodeOnEdge(secondResult.edge, latlng.lat, latlng.lng, baseForSecond);
-      const split2 = nearNode2
-        ? { newNodeId: nearNode2.id, newGraph: baseForSecond, newBlockedSet: new Set(baseBlockedForSecond), newTrafficSet: new Set(baseTrafficForSecond) }
-        : splitEdgeAtSync(baseForSecond, secondResult.edge.id, secondResult.projection, baseBlockedForSecond, baseTrafficForSecond);
-
-      // now split2.newGraph is the final working graph containing both splits (if any)
-      const finalGraph = split2.newGraph;
-      const finalBlocked = split2.newBlockedSet;
-      const finalTraffic = split2.newTrafficSet;
-
-      const nodeA = firstBlockNode.nodeId;
-      const nodeB = split2.newNodeId;
-
-      // find undirected path on finalGraph
-      const pathNodes = findPathBetweenNodesUndirected(finalGraph, nodeA, nodeB);
-
-      const statusToApply = roadStatusMode === "clear" ? null : roadStatusMode;
-
-      if (pathNodes && pathNodes.length > 1) {
-        const { affected, newBlocked, newTraffic } = applyStatusToPathOnGraph(finalGraph, pathNodes, statusToApply, finalBlocked, finalTraffic);
-
-        // persist the graph and sets
-        setGraph(finalGraph);
-        setBlockedEdges(newBlocked);
-        setTrafficJamEdges(newTraffic);
-
-        resetVisualization();
-
-        const nodeNames = pathNodes.map((id) => finalGraph.nodes.find(n => n.id === id)?.name || id).join(" → ");
-        alert(`✓ Applied ${roadStatusMode} to ${affected} road segment(s):\n${nodeNames}`);
+      if (startEdgeInfo.edgeId === endEdgeInfo.edgeId) {
+        edgesToModify.add(startEdgeInfo.edgeId);
       } else {
-        alert("No path found between the two selected points (on the working graph). Operation aborted.");
+        const pathNodes = findPathBetweenNodesUndirected(graph, startEdgeInfo.to, endEdgeInfo.from) 
+                       || findPathBetweenNodesUndirected(graph, startEdgeInfo.from, endEdgeInfo.to)
+                       || findPathBetweenNodesUndirected(graph, startEdgeInfo.to, endEdgeInfo.to)
+                       || findPathBetweenNodesUndirected(graph, startEdgeInfo.from, endEdgeInfo.from);
+
+        if (pathNodes && pathNodes.length > 0) {
+          edgesToModify.add(startEdgeInfo.edgeId);
+          edgesToModify.add(endEdgeInfo.edgeId);
+          
+          for (let i = 0; i < pathNodes.length - 1; i++) {
+            const a = pathNodes[i];
+            const b = pathNodes[i+1];
+            const edgesBetween = graph.edges.filter(
+              (e) => (e.from === a && e.to === b) || (e.from === b && e.to === a)
+            );
+            edgesBetween.forEach(e => edgesToModify.add(e.id));
+          }
+        } else {
+          alert("No path found between the two selected roads. Operation aborted.");
+          setFirstBlockNode(null);
+          setFirstBlockPoint(null);
+          return;
+        }
       }
 
-      // clear temp and first selection
+      // Apply the status change using the robust functional update pattern
+      const statusToApply = roadStatusMode === 'clear' ? null : roadStatusMode;
+
+      setBlockedEdges(currentBlocked => {
+        const newBlocked = new Set(currentBlocked);
+        edgesToModify.forEach(edgeId => {
+            if (statusToApply === "block") newBlocked.add(edgeId);
+            else newBlocked.delete(edgeId);
+        });
+        return newBlocked;
+      });
+
+      setTrafficJamEdges(currentTraffic => {
+        const newTraffic = new Set(currentTraffic);
+        edgesToModify.forEach(edgeId => {
+            if (statusToApply === "traffic") newTraffic.add(edgeId);
+            else newTraffic.delete(edgeId);
+        });
+        return newTraffic;
+      });
+      
+      resetVisualization();
+      alert(`✓ Applied ${roadStatusMode} to ${edgesToModify.size} road segment(s).`);
+
       setFirstBlockNode(null);
       setFirstBlockPoint(null);
-      tempGraphRef.current = null;
       return;
     }
 
-    // select start/end
+    // --- SELECTING START/END (UNCHANGED) ---
     if (mode === "select") {
       const result = findNearestEdgeAndProjection(latlng.lat, latlng.lng);
       if (!result) {
@@ -505,7 +498,6 @@ const toggleEdgeStatusByEdgeId = (edgeId, status) => {
       const clickPoint = {
         lat: latlng.lat,
         lng: latlng.lng,
-        // store projection but DO NOT rely on stored nearestEdge during runAStar
         projection: result.projection,
       };
 
