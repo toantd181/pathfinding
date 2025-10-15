@@ -2169,13 +2169,6 @@
       "bidirectional": true
     },
     {
-      "id": 1759583879870,
-      "from": 1759583731717,
-      "to": 1759583763476,
-      "distance": 94,
-      "bidirectional": false
-    },
-    {
       "id": 1759583881293,
       "from": 1759583763476,
       "to": 1759583873597,
@@ -2993,11 +2986,13 @@
       "to": 1759567173832,
       "distance": 140,
       "bidirectional": false
+    },
+    {
+      "id": 1760001505476,
+      "from": 1759583731717,
+      "to": 1759583763476,
+      "distance": 94,
+      "bidirectional": false
     }
-  ],
-  "metadata": {
-    "created": "2025-10-06T05:47:34.228Z",
-    "nodeCount": 237,
-    "edgeCount": 187
-  }
+  ]
 }

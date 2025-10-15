@@ -1,6 +1,6 @@
+// App.js
 import React, { useState } from 'react';
 import ManualGraphBuilder from './ManualBuilder';
-// Import the new dashboard component
 import PathfindingDashboard from './PathfindingDashboard';
 
 function App() {
@@ -35,7 +35,7 @@ function App() {
       </nav>
 
       {/* Content area */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-hidden">
         {currentView === 'builder' ? (
           <ManualGraphBuilder />
         ) : (
